@@ -1,0 +1,50 @@
+{% extends 'store/admin/base.html' %}
+{% block content %}
+
+<div class="admin-header">
+    <h2>Order #{{ order.id }}</h2>
+    <a href="/dashboard/orders/" class="btn btn-outline">← Back</a>
+</div>
+
+<div class="order-detail-grid">
+    <div class="admin-form-box">
+        <h3>Customer Info</h3>
+        <p><strong>Username:</strong> {{ order.user.username }}</p>
+        <p><strong>Name:</strong> {{ order.full_name }}</p>
+        <p><strong>Phone:</strong> {{ order.phone }}</p>
+        <p><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+        <p><strong>Payment:</strong> {{ order.payment_method|upper }}</p>
+        <p><strong>Date:</strong> {{ order.created_at|date:"d M Y H:i" }}</p>
+
+        <h3 style="margin-top:20px;">Update Status</h3>
+        <form method="POST" action="/dashboard/orders/{{ order.id }}/status/">
+            {% csrf_token %}
+            <select name="status">
+                {% for val, label in order.STATUS_CHOICES %}
+                <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn" style="margin-top:10px;">Update</button>
+        </form>
+    </div>
+
+    <div class="admin-form-box">
+        <h3>Order Items</h3>
+        <table class="admin-table">
+            <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+            <tbody>
+                {% for item in order.orderitem_set.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>${{ item.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p style="text-align:right;font-size:18px;margin-top:10px;"><strong>Total: ${{ order.total }}</strong></p>
+    </div>
+</div>
+
+{% endblock %}

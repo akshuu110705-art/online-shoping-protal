@@ -1,0 +1,38 @@
+{% load static %}
+<header>
+    <div class="header-top">
+        <h1><a href="/" style="color:white;text-decoration:none;">🛒 ShopEasy</a></h1>
+        <div class="search-bar">
+            <form method="GET" action="/products/">
+                <input type="text" name="q" placeholder="Search products...">
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+        <div class="header-links">
+            {% if request.user.is_authenticated %}
+                <span>👤 {{ request.user.username }}</span>
+                <a href="/orders/">My Orders</a>
+                <a href="/wishlist/">❤️ Wishlist</a>
+                <a href="/logout/">Logout</a>
+            {% else %}
+                <a href="/login/">Login</a>
+                <a href="/register/">Register</a>
+            {% endif %}
+            <a href="/cart/" class="cart-icon">🛒 Cart
+                {% if cart_count > 0 %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+            </a>
+        </div>
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products/">All Products</a>
+        <a href="/products/?category=electronics">Electronics</a>
+        <a href="/products/?category=clothing">Clothing</a>
+        <a href="/products/?gender=women&category=clothing">Women</a>
+        <a href="/products/?gender=men&category=clothing">Men</a>
+        <a href="/products/?gender=kids&category=clothing">Kids</a>
+        <a href="/products/?category=books">Books</a>
+        <a href="/products/?category=home">Home & Living</a>
+        <a href="/products/?category=sports">Sports</a>
+    </nav>
+</header>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Track Order #{{ order.id }} - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+    <style>
+        .tracking-page { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+        .tracking-box { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .tracking-box h2 { font-size: 22px; margin-bottom: 5px; }
+        .tracking-box p { color: #888; font-size: 14px; margin-bottom: 25px; }
+        .timeline { display: flex; justify-content: space-between; position: relative; margin: 30px 0; }
+        .timeline::before { content: ''; position: absolute; top: 24px; left: 0; right: 0; height: 4px; background: #e0e0e0; z-index: 0; }
+        .timeline-progress { position: absolute; top: 24px; left: 0; height: 4px; background: #28a745; z-index: 1; transition: width 0.5s; }
+        .step { flex: 1; text-align: center; position: relative; z-index: 2; }
+        .step-circle { width: 48px; height: 48px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 20px; border: 3px solid #e0e0e0; }
+        .step.done .step-circle { background: #28a745; border-color: #28a745; }
+        .step.active .step-circle { background: #007bff; border-color: #007bff; animation: pulse 1.5s infinite; }
+        .step-label { font-size: 12px; font-weight: bold; color: #aaa; }
+        .step.done .step-label, .step.active .step-label { color: #333; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,123,255,0.4); } 50% { box-shadow: 0 0 0 8px rgba(0,123,255,0); } }
+        .order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
+        .info-card { background: #f8f9fa; border-radius: 8px; padding: 15px; font-size: 14px; }
+        .info-card strong { display: block; color: #555; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; }
+        .location-box { background: #e8f5e9; border-radius: 8px; padding: 15px; margin-top: 20px; display: flex; align-items: center; gap: 12px; }
+        .location-box .loc-icon { font-size: 30px; }
+        .location-box h4 { margin: 0 0 4px; font-size: 15px; }
+        .location-box p { margin: 0; font-size: 13px; color: #555; }
+        {% if order.status == 'cancelled' %}
+        .step-circle { background: #dc3545 !important; border-color: #dc3545 !important; }
+        {% endif %}
+    </style>
+</head>
+<body>
+{% include 'store/header.html' %}
+
+<div class="tracking-page">
+    <div class="tracking-box">
+        <h2>📦 Track Order #{{ order.id }}</h2>
+        <p>Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+
+        {% if order.status == 'cancelled' %}
+        <div style="background:#f8d7da;color:#721c24;padding:15px;border-radius:8px;text-align:center;font-weight:bold;">
+            ❌ This order has been cancelled.
+        </div>
+        {% else %}
+        <!-- TIMELINE -->
+        <div class="timeline">
+            {% with progress_widths="0%,33%,66%,100%" %}
+            <div class="timeline-progress" style="width:{% if current == 0 %}0%{% elif current == 1 %}33%{% elif current == 2 %}66%{% else %}100%{% endif %}"></div>
+            {% endwith %}
+            {% for step in steps %}
+            <div class="step {% if forloop.counter0 < current %}done{% elif forloop.counter0 == current %}active{% endif %}">
+                <div class="step-circle">
+                    {% if forloop.counter0 < current %}✓
+                    {% elif step == 'pending' %}🕐
+                    {% elif step == 'processing' %}⚙️
+                    {% elif step == 'shipped' %}🚚
+                    {% else %}✅{% endif %}
+                </div>
+                <div class="step-label">{{ step|title }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- LOCATION -->
+        <div class="location-box">
+            <div class="loc-icon">📍</div>
+            <div>
+                <h4>Current Location</h4>
+                <p>
+                    {% if order.status == 'pending' %}Order confirmed at warehouse — {{ order.city }}
+                    {% elif order.status == 'processing' %}Being packed at fulfillment center — {{ order.city }}
+                    {% elif order.status == 'shipped' %}In transit — On the way to {{ order.city }}, {{ order.state }}
+                    {% elif order.status == 'delivered' %}Delivered to {{ order.address }}, {{ order.city }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ORDER INFO -->
+        <div class="order-info-grid">
+            <div class="info-card">
+                <strong>Deliver To</strong>
+                {{ order.full_name }}<br>{{ order.address }}, {{ order.city }}<br>{{ order.state }} - {{ order.pincode }}
+            </div>
+            <div class="info-card">
+                <strong>Order Details</strong>
+                Total: ${{ order.total }}<br>
+                Payment: {{ order.payment_method|upper }}<br>
+                Status: <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <a href="/orders/" class="btn btn-outline">← My Orders</a>
+        </div>
+    </div>
+</div>
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>

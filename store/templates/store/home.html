@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Shopping Portal</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<section class="hero">
+    <div class="hero-content">
+        <h2>Welcome to ShopEasy</h2>
+        <p>Shop your favorite products easily and securely.</p>
+        <a href="/products/" class="btn">Shop Now</a>
+    </div>
+</section>
+
+<section class="offers">
+    <div class="offer-banner">🔥 Special Offer: Up to 50% OFF on Electronics!</div>
+    <div class="offer-banner green">🎉 Free Shipping on orders above $50!</div>
+</section>
+
+<section class="categories">
+    <h2>Browse Categories</h2>
+    <div class="category-grid">
+        <a href="/products/?category=electronics" class="category-card">📱 Electronics</a>
+        <a href="/products/?category=clothing" class="category-card">👕 Clothing</a>
+        <a href="/products/?category=books" class="category-card">📚 Books</a>
+        <a href="/products/?category=home" class="category-card">🏠 Home & Living</a>
+        <a href="/products/?category=sports" class="category-card">⚽ Sports</a>
+        <a href="/products/?category=beauty" class="category-card">💄 Beauty</a>
+    </div>
+</section>
+
+{% if request.user.is_staff %}
+<div style="background:#1a1a2e;padding:12px 30px;display:flex;align-items:center;gap:15px;">
+    <span style="color:white;font-weight:bold;">⚙️ Admin Quick Actions:</span>
+    <a href="/dashboard/products/add/" class="btn" style="padding:6px 14px;font-size:13px;">➕ Add Product</a>
+    <a href="/dashboard/products/" class="btn btn-outline" style="padding:6px 14px;font-size:13px;color:white;border-color:white;">📦 Manage Products</a>
+    <a href="/dashboard/" class="btn btn-outline" style="padding:6px 14px;font-size:13px;color:white;border-color:white;">📊 Dashboard</a>
+</div>
+{% endif %}
+
+<section class="featured">
+    <h2>Featured Products</h2>
+    <div class="product-grid">
+        {% for product in featured_products %}
+        <div class="product-card">
+            <div class="product-img">
+                {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% elif product.category == 'electronics' %}📱
+                {% elif product.category == 'clothing' %}👕
+                {% elif product.category == 'books' %}📚
+                {% elif product.category == 'sports' %}⚽
+                {% elif product.category == 'beauty' %}💄
+                {% elif product.category == 'home' %}🏠
+                {% else %}🛍️{% endif %}
+            </div>
+            <div class="product-card-body">
+                <p class="category-tag">{{ product.category|title }}</p>
+                <h3>{{ product.name }}</h3>
+                <div class="card-footer">
+                    <span class="price">${{ product.price }}</span>
+                    <a href="/products/{{ product.id }}/" class="btn">View</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-msg">No products yet. <a href="/dashboard/products/add/">Add Products</a></p>
+        {% endfor %}
+    </div>
+</section>
+
+<footer>
+    <p>© 2024 ShopEasy. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

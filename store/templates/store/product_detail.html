@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }} - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<div class="breadcrumb">
+    <a href="/">Home</a> ›
+    <a href="/products/">Products</a> ›
+    <a href="/products/?category={{ product.category }}">{{ product.category|title }}</a> ›
+    <span>{{ product.name }}</span>
+</div>
+
+<section class="product-detail-page">
+
+    <!-- IMAGE BOX -->
+    <div class="detail-image-box">
+        <div class="detail-main-img">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="no-image-placeholder">
+                    {% if product.category == 'electronics' %}📱
+                    {% elif product.category == 'clothing' %}👕
+                    {% elif product.category == 'books' %}📚
+                    {% elif product.category == 'sports' %}⚽
+                    {% elif product.category == 'beauty' %}💄
+                    {% elif product.category == 'home' %}🏠
+                    {% else %}🛍️{% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="detail-thumbnails">
+            {% if product.image %}
+                <div class="thumb active"><img src="{{ product.image.url }}" alt="thumb"></div>
+            {% else %}
+                <div class="thumb active">🛍️</div>
+                <div class="thumb">📦</div>
+                <div class="thumb">🏷️</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- INFO BOX -->
+    <div class="detail-info-box">
+        <p class="category-tag">{{ product.category|title }}</p>
+        <h1>{{ product.name }}</h1>
+
+        <div class="detail-rating">
+            <span class="stars">⭐⭐⭐⭐☆</span>
+            <span class="review-count">(24 reviews)</span>
+        </div>
+
+        <div class="detail-price-box">
+            <span class="detail-price">${{ product.price }}</span>
+        </div>
+
+        <div class="detail-stock-box">
+            {% if product.stock > 0 %}
+            <span class="stock-available">✅ In Stock</span>
+            <span class="stock-count">{{ product.stock }} units available</span>
+            {% else %}
+            <span class="stock-out">❌ Out of Stock</span>
+            {% endif %}
+        </div>
+
+        <div class="detail-description">
+            <h3>Description</h3>
+            <p>{{ product.description }}</p>
+        </div>
+
+        <div class="detail-meta">
+            <div class="meta-item"><span>📦 Category:</span> {{ product.category|title }}</div>
+            <div class="meta-item"><span>🚚 Delivery:</span> Free shipping on orders above $50</div>
+            <div class="meta-item"><span>↩️ Returns:</span> 30-day easy returns</div>
+        </div>
+
+        {% if product.stock > 0 %}
+        <form method="POST" action="/cart/add/{{ product.id }}/" class="add-to-cart-form">
+            {% csrf_token %}
+            <div class="qty-selector">
+                <button type="button" onclick="changeQty(-1)">−</button>
+                <input type="number" name="quantity" id="qty" value="1" min="1" max="{{ product.stock }}">
+                <button type="button" onclick="changeQty(1)">+</button>
+            </div>
+            <button type="submit" class="btn btn-cart">🛒 Add to Cart</button>
+        </form>
+        <form method="POST" action="/buy-now/{{ product.id }}/" style="margin-top:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" id="buy-qty" value="1">
+            <button type="submit" class="btn btn-buy" style="width:100%;">⚡ Buy Now</button>
+        </form>
+        {% else %}
+        <button class="btn disabled" disabled>Out of Stock</button>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        <a href="/wishlist/toggle/{{ product.id }}/" style="display:block;text-align:center;margin-top:10px;font-size:15px;color:#e74c3c;text-decoration:none;">
+            {% if in_wishlist %}❤️ Remove from Wishlist{% else %}🤍 Add to Wishlist{% endif %}
+        </a>
+        {% endif %}
+
+        <a href="/products/" class="back-link">← Back to Products</a>
+    </div>
+</section>
+
+<!-- TABS -->
+<section class="product-tabs-section">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('desc', this)">Description</button>
+        <button class="tab-btn" onclick="showTab('reviews', this)">Reviews (24)</button>
+        <button class="tab-btn" onclick="showTab('shipping', this)">Shipping Info</button>
+    </div>
+    <div id="desc" class="tab-content active">
+        <p>{{ product.description }}</p>
+        <ul>
+            <li>Category: {{ product.category|title }}</li>
+            <li>Stock: {{ product.stock }} units</li>
+            <li>Price: ${{ product.price }}</li>
+        </ul>
+    </div>
+    <div id="reviews" class="tab-content">
+        {% if request.user.is_authenticated and not user_review %}
+        <form method="POST" action="/products/{{ product.id }}/review/" style="background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;">
+            {% csrf_token %}
+            <strong>Write a Review</strong>
+            <div style="margin:10px 0;">
+                <label>Rating: </label>
+                {% for i in "12345" %}
+                <input type="radio" name="rating" value="{{ i }}" id="r{{ i }}" {% if forloop.last %}checked{% endif %}>
+                <label for="r{{ i }}">{{ i }}⭐</label>
+                {% endfor %}
+            </div>
+            <textarea name="comment" rows="3" placeholder="Your review..." style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;" required></textarea>
+            <button type="submit" class="btn" style="margin-top:8px;">Submit Review</button>
+        </form>
+        {% endif %}
+        {% for review in reviews %}
+        <div class="review-item">
+            <strong>{{ review.user.username }}</strong>
+            <span class="stars">{% for i in "12345" %}{% if forloop.counter <= review.rating %}⭐{% else %}☆{% endif %}{% endfor %}</span>
+            <small style="color:#aaa;margin-left:8px;">{{ review.created_at|date:"d M Y" }}</small>
+            <p>{{ review.comment }}</p>
+        </div>
+        {% empty %}
+        <p style="color:#888;">No reviews yet. Be the first to review!</p>
+        {% endfor %}
+    </div>
+    <div id="shipping" class="tab-content">
+        <ul>
+            <li>🚚 Free shipping on orders above $50</li>
+            <li>📦 Standard delivery: 3-5 business days</li>
+            <li>⚡ Express delivery: 1-2 business days</li>
+            <li>↩️ Easy 30-day returns</li>
+        </ul>
+    </div>
+</section>
+
+<!-- RELATED PRODUCTS -->
+{% if related_products %}
+<section class="related-section">
+    <h2>Related Products</h2>
+    <div class="product-grid">
+        {% for p in related_products %}
+        <div class="product-card">
+            <div class="product-img">
+                {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}">
+                {% else %}🛍️{% endif %}
+            </div>
+            <div class="product-card-body">
+                <p class="category-tag">{{ p.category|title }}</p>
+                <h3>{{ p.name }}</h3>
+                <div class="card-footer">
+                    <span class="price">${{ p.price }}</span>
+                    <a href="/products/{{ p.id }}/" class="btn">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+
+<script>
+function changeQty(val) {
+    const input = document.getElementById('qty');
+    const newVal = parseInt(input.value) + val;
+    if (newVal >= 1 && newVal <= parseInt(input.max)) {
+        input.value = newVal;
+        document.getElementById('buy-qty').value = newVal;
+    }
+}
+function showTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

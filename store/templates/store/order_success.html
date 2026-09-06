@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Placed - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<section class="success-page">
+    <div class="success-box">
+        <div class="success-icon">✅</div>
+        <h2>Order Placed Successfully!</h2>
+        <p>Thank you, <strong>{{ order.full_name }}</strong>! Your order has been placed.</p>
+        <div class="order-info">
+            <p><strong>Order ID:</strong> #{{ order.id }}</p>
+            <p><strong>Total:</strong> ${{ order.total }}</p>
+            <p><strong>Payment:</strong> {{ order.payment_method|upper }}</p>
+            <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+            <p><strong>Delivery to:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+        </div>
+        <a href="/orders/" class="btn">View Order History</a>
+        <a href="/products/" class="btn btn-outline">Continue Shopping</a>
+    </div>
+</section>
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<section class="orders-page">
+    <h2>My Orders</h2>
+    {% if orders %}
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <span><strong>Order #{{ order.id }}</strong></span>
+            <span>{{ order.created_at|date:"d M Y" }}</span>
+            <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+            <span><strong>${{ order.total }}</strong></span>
+            {% if order.status == 'pending' %}
+            <a href="/orders/cancel/{{ order.id }}/"
+               class="btn-danger"
+               onclick="return confirm('Cancel this order?')">Cancel Order</a>
+            {% endif %}
+            {% if order.status != 'cancelled' %}
+            <a href="/orders/track/{{ order.id }}/" class="btn" style="padding:4px 12px;font-size:13px;">📍 Track</a>
+            {% endif %}
+        </div>
+        <div class="order-items">
+            {% for item in order.orderitem_set.all %}
+            <div class="order-item-row">
+                <span>{{ item.product.name }}</span>
+                <span>x{{ item.quantity }}</span>
+                <span>${{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <p class="order-address">📍 {{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="empty-msg">No orders yet. <a href="/products/">Start Shopping</a></p>
+    {% endif %}
+</section>
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <h1>🛒 ShopEasy</h1>
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products/">Products</a>
+    </nav>
+</header>
+
+<section class="auth-page">
+    <div class="auth-box">
+        <h2>Create Account</h2>
+        {% if messages %}
+            {% for message in messages %}
+            <p class="error-msg">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="POST" action="/register/">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password1" placeholder="Password" required>
+            <input type="password" name="password2" placeholder="Confirm Password" required>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <p>Already have an account? <a href="/login/">Login here</a></p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2024 ShopEasy. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

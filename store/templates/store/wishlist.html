@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Wishlist - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+{% include 'store/header.html' %}
+
+<section class="orders-page">
+    <h2>❤️ My Wishlist</h2>
+    {% if items %}
+    <div class="product-grid">
+        {% for item in items %}
+        <div class="product-card">
+            <div class="product-img">
+                {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {% else %}🛍️{% endif %}
+            </div>
+            <div class="product-card-body">
+                <p class="category-tag">{{ item.product.category|title }}</p>
+                <h3>{{ item.product.name }}</h3>
+                <div class="card-footer">
+                    <span class="price">${{ item.product.price }}</span>
+                    <a href="/products/{{ item.product.id }}/" class="btn">View</a>
+                </div>
+                <a href="/wishlist/toggle/{{ item.product.id }}/" class="btn-danger" style="display:block;text-align:center;margin-top:8px;">❌ Remove</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-msg">Your wishlist is empty. <a href="/products/">Browse Products</a></p>
+    {% endif %}
+</section>
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>

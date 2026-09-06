@@ -1,0 +1,41 @@
+{% extends 'store/admin/base.html' %}
+{% block content %}
+
+<div class="admin-header">
+    <h2>Manage Users</h2>
+</div>
+
+<table class="admin-table">
+    <thead>
+        <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>#{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{% if user.is_staff %}🔑 Admin{% else %}👤 User{% endif %}</td>
+            <td>
+                {% if user.is_active %}
+                <span class="status-badge status-delivered">Active</span>
+                {% else %}
+                <span class="status-badge status-cancelled">Blocked</span>
+                {% endif %}
+            </td>
+            <td>{{ user.date_joined|date:"d M Y" }}</td>
+            <td>
+                {% if user != request.user %}
+                <a href="/dashboard/users/{{ user.id }}/toggle/" class="{% if user.is_active %}btn-danger{% else %}btn-sm{% endif %}">
+                    {% if user.is_active %}Block{% else %}Unblock{% endif %}
+                </a>
+                {% else %}
+                <span style="color:#aaa;">You</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

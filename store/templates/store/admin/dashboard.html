@@ -1,0 +1,64 @@
+{% extends 'store/admin/base.html' %}
+{% block content %}
+
+<div class="admin-header">
+    <h2>Dashboard</h2>
+    <p>Welcome back, {{ request.user.username }}!</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-icon">🧾</div>
+        <div>
+            <h3>{{ total_orders }}</h3>
+            <p>Total Orders</p>
+        </div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">👥</div>
+        <div>
+            <h3>{{ total_users }}</h3>
+            <p>Total Users</p>
+        </div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">📦</div>
+        <div>
+            <h3>{{ total_products }}</h3>
+            <p>Total Products</p>
+        </div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">💰</div>
+        <div>
+            <h3>${{ total_sales }}</h3>
+            <p>Total Sales</p>
+        </div>
+    </div>
+</div>
+
+<div class="admin-section">
+    <h3>Recent Orders</h3>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>${{ order.total }}</td>
+                <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                <td>{{ order.created_at|date:"d M Y" }}</td>
+                <td><a href="/dashboard/orders/{{ order.id }}/" class="btn-sm">View</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" style="text-align:center;color:#888;">No orders yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/dashboard/orders/" class="btn" style="margin-top:15px;display:inline-block;">View All Orders</a>
+</div>
+
+{% endblock %}

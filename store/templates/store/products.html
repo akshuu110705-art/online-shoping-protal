@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<div class="breadcrumb">
+    <a href="/">Home</a> › <a href="/products/">Products</a>
+    {% if request.GET.category %} › <span>{{ request.GET.category|title }}</span>{% endif %}
+    {% if request.GET.q %} › Search: <span>"{{ request.GET.q }}"</span>{% endif %}
+</div>
+
+<div class="products-layout">
+    <aside class="filter-sidebar">
+        <h3>🔽 Filter</h3>
+        <form method="GET">
+            <div class="filter-group">
+                <label>Gender</label>
+                <select name="gender" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    <option value="women" {% if request.GET.gender == 'women' %}selected{% endif %}>Women</option>
+                    <option value="men" {% if request.GET.gender == 'men' %}selected{% endif %}>Men</option>
+                    <option value="kids" {% if request.GET.gender == 'kids' %}selected{% endif %}>Kids</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Category</label>
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <option value="electronics" {% if request.GET.category == 'electronics' %}selected{% endif %}>📱 Electronics</option>
+                    <option value="clothing" {% if request.GET.category == 'clothing' %}selected{% endif %}>👕 Clothing</option>
+                    <option value="books" {% if request.GET.category == 'books' %}selected{% endif %}>📚 Books</option>
+                    <option value="home" {% if request.GET.category == 'home' %}selected{% endif %}>🏠 Home & Living</option>
+                    <option value="sports" {% if request.GET.category == 'sports' %}selected{% endif %}>⚽ Sports</option>
+                    <option value="beauty" {% if request.GET.category == 'beauty' %}selected{% endif %}>💄 Beauty</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" name="q" placeholder="Product name..." value="{{ request.GET.q }}">
+            </div>
+            <button type="submit" class="btn" style="width:100%;">Apply</button>
+            <a href="/products/" class="btn btn-outline" style="width:100%;margin-top:8px;text-align:center;display:block;">Clear</a>
+        </form>
+    </aside>
+
+    <section class="products-page">
+        <div class="products-toolbar">
+            <p><strong>{{ total }}</strong> product(s) found</p>
+        </div>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                {% if product.stock == 0 %}<span class="badge badge-red">Out of Stock</span>
+                {% elif product.stock <= 5 %}<span class="badge badge-orange">Low Stock</span>
+                {% else %}<span class="badge badge-green">In Stock</span>{% endif %}
+
+                <div class="product-img">
+                    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% elif product.category == 'electronics' %}📱
+                    {% elif product.category == 'clothing' %}👕
+                    {% elif product.category == 'books' %}📚
+                    {% elif product.category == 'sports' %}⚽
+                    {% elif product.category == 'beauty' %}💄
+                    {% elif product.category == 'home' %}🏠
+                    {% else %}🛍️{% endif %}
+                </div>
+                <div class="product-card-body">
+                    <p class="category-tag">{{ product.category|title }}</p>
+                    <h3>{{ product.name }}</h3>
+                    <p class="short-desc">{{ product.description|truncatechars:60 }}</p>
+                    <div class="rating">⭐⭐⭐⭐☆</div>
+                    <div class="card-footer">
+                        <span class="price">${{ product.price }}</span>
+                        <a href="/products/{{ product.id }}/" class="btn">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div style="font-size:60px;">🔍</div>
+                <h3>No products found</h3>
+                <p>Try a different search or category.</p>
+                <a href="/products/" class="btn">View All Products</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+{% if products.has_other_pages %}
+<div style="display:flex;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
+    {% if products.has_previous %}
+    <a href="?page={{ products.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}" style="padding:8px 16px;background:#6c63ff;color:white;border-radius:20px;text-decoration:none;font-weight:600;">&#8592; Prev</a>
+    {% endif %}
+    {% for i in products.paginator.page_range %}
+        {% if products.number == i %}
+        <span style="padding:8px 16px;background:#6c63ff;color:white;border-radius:20px;font-weight:700;">{{ i }}</span>
+        {% elif i > products.number|add:-3 and i < products.number|add:3 %}
+        <a href="?page={{ i }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}" style="padding:8px 16px;background:white;color:#6c63ff;border-radius:20px;text-decoration:none;border:2px solid #6c63ff;font-weight:600;">{{ i }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if products.has_next %}
+    <a href="?page={{ products.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}" style="padding:8px 16px;background:#6c63ff;color:white;border-radius:20px;text-decoration:none;font-weight:600;">Next &#8594;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>

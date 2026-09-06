@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout - ShopEasy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+
+{% include 'store/header.html' %}
+
+<section class="checkout-page">
+    <h2>Checkout</h2>
+    <div class="checkout-grid">
+        <div class="checkout-form">
+            <form method="POST" action="/checkout/place-order/">
+                {% csrf_token %}
+                <h3>Shipping Address</h3>
+                <input type="text" name="full_name" placeholder="Full Name" required>
+                <input type="text" name="address" placeholder="Street Address" required>
+                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="state" placeholder="State" required>
+                <input type="text" name="pincode" placeholder="PIN Code" required>
+                <input type="text" name="phone" placeholder="Phone Number" required>
+                <h3>Payment Method</h3>
+                <label><input type="radio" name="payment" value="cod" checked> Cash on Delivery</label>
+                <label><input type="radio" name="payment" value="card"> Credit / Debit Card</label>
+                <label><input type="radio" name="payment" value="upi"> UPI</label>
+                <button type="submit" class="btn">Place Order ✅</button>
+            </form>
+        </div>
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            {% for item in cart_items %}
+            <div class="summary-item">
+                <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                <span>${{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+            <hr>
+            <div class="summary-total"><strong>Total: ${{ total }}</strong></div>
+        </div>
+    </div>
+</section>
+
+<footer><p>© 2024 ShopEasy. All rights reserved.</p></footer>
+</body>
+</html>
